@@ -58,13 +58,108 @@ Les paramètres définis dans `main.py` contrôlent la simulation :
 
 ---
 
-##  Exemple de configuration
+## Mathématiques
+
+## 🧮 Formulation mathématique
+
+### Équation de la chaleur 1D
+$$
+\rho\,C_p\,\frac{\partial T}{\partial t}
+= \frac{\partial}{\partial x}\!\left(k(T)\,\frac{\partial T}{\partial x}\right),
+\qquad 0<x<e,\; t>0
+$$
+
+**Condition initiale**
+$$
+T(x,0)=T_i
+$$
+
+**Conditions aux limites (exemples utilisés)**
+- Température imposée à gauche :
+$$
+T(0,t)=T_s
+$$
+- Flux imposé (Neumann) à droite :
+$$
+-\,k(T)\,\frac{\partial T}{\partial x}\Big|_{x=e}=q_\text{droit}
+\quad(\text{adiabatique si } q_\text{droit}=0)
+$$
+
+**Diffusivité thermique**
+$$
+\alpha=\frac{k}{\rho\,C_p}
+$$
+
+---
+
+### Solution analytique (mur plan, Dirichlet à gauche / Neumann à droite)
+
+**Profil temporel \(T(x,t)\)**
+$$
+T(x,t)=
+T_s+\frac{4}{\pi}\,(T_i-T_s)
+\sum_{n=0}^{\infty}
+\frac{1}{2n+1}\,
+\sin\!\Big(\frac{(2n+1)\pi\,x}{2e}\Big)\,
+\exp\!\Big[-\alpha\Big(\frac{(2n+1)\pi}{2e}\Big)^2 t\Big]
+$$
+
+**Température au centre (x = e)**
+$$
+T(e,t)=
+T_s+4\,(T_i-T_s)
+\sum_{n=0}^{\infty}
+\frac{(-1)^n}{(2n+1)\pi}\,
+\exp\!\Big[-\alpha\Big(\frac{(2n+1)\pi}{2e}\Big)^2 t\Big]
+$$
+
+---
+
+**Erreur relative (FVM vs analytique)**
+$$
+\mathrm{erreur}(x,t)\,[\%]
+=100\;\frac{T_\text{FVM}(x,t)-T_\text{analytique}(x,t)}{T_\text{analytique}(x,t)}
+$$
+
+---
+
+**Contrainte thermo-élastique (profil à travers l’épaisseur)**
+
+Déformation thermique locale :
+$$
+\varepsilon_\theta(x)=\alpha\,\big(T(x,t)-T_\text{ref}\big)
+$$
+
+Choix conservatif du module effectif :
+$$
+\bar E=\frac{E}{1-\nu}
+$$
+
+Paramètres imposés par les CL (face externe libre \(\sigma(0,t)=0\), face arrière bloquée \(\varepsilon(e,t)=0\)) :
+$$
+\varepsilon_0=\frac{\varepsilon_\theta(0)+\varepsilon_\theta(e)}{2},
+\qquad
+\kappa=\frac{\varepsilon_\theta(0)-\varepsilon_\theta(e)}{e}
+$$
+
+Contrainte à l’abscisse \(x\in[0,e]\) :
+$$
+\sigma(x)=\bar E\left[\,
+\varepsilon_0+\kappa\Big(x-\frac{e}{2}\Big)-\varepsilon_\theta(x)\right]
+=
+\frac{E}{1-\nu}\left[\,
+\varepsilon_0+\kappa\Big(x-\frac{e}{2}\Big)
+-\alpha\big(T(x,t)-T_\text{ref}\big)\right]
+$$
+
+
+## Exemple de configuration
 
 ```python
 index_materiaux = np.array([
     [0.1],          # Limite de la couche (m)
     ["AFRSI"]       # Nom du matériau
-], dtype=object)
+], dtype=object)```
 
 ## Dépendance
 pip install numpy scipy matplotlib
